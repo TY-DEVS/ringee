@@ -44,8 +44,6 @@ services:
     networks:
       - ringee-network
 
-  # Temporal server (durable background jobs). auto-setup creates the
-  # `temporal` and `temporal_visibility` databases on the shared Postgres.
   ringee-temporal:
     image: temporalio/auto-setup:1.25
     container_name: ringee-temporal
@@ -60,29 +58,10 @@ services:
     depends_on:
       ringee-postgres:
         condition: service_healthy
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "temporal",
-          "operator",
-          "cluster",
-          "health",
-          "--address",
-          "127.0.0.1:7233",
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
     restart: unless-stopped
     networks:
       - ringee-network
 
-  # Opt-in only: the UI is a debugging convenience, not a runtime dependency.
-  # It does NOT start with `docker-compose up -d`; bring it up on demand with
-  # `docker-compose --profile debug up -d ringee-temporal-ui`. Keeping it off by
-  # default avoids paying for an always-on container on self-hosted deploys.
   ringee-temporal-ui:
     image: temporalio/ui:2.31.2
     container_name: ringee-temporal-ui
